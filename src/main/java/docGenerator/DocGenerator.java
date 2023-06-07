@@ -9,7 +9,8 @@ public class DocGenerator {
 
     public static Document get(ArrayList<ArrayList<String>> excelDataList,
                                ArrayList<String> rowHeadingsList,
-                               int firstDataRowIndex){
+                               int firstDataRowIndex,
+                               String totalUnit){
         /**
          * "name":“中国统计年鉴”，
          * "year":"2012"
@@ -22,7 +23,7 @@ public class DocGenerator {
                 .append("year", "2012")
                 .append("address", "全国")
                 .append("execel_name", excelDataList.get(0).get(0))
-                .append("industry", "综合");      //where the info?
+                .append("industry", "综合");
 
         //存储data数据
         // 创建数据列表
@@ -32,7 +33,8 @@ public class DocGenerator {
             for (int j = 1; j < curRowData.size(); j++) {
                 if (!curRowData.get(j).equals(""))
                     dataDoc.add(new Document()
-                            .append("unit", rowHeadingsList.get(rowHeadingsList.size()-1))
+
+                            .append("unit", totalUnit)
                             .append("row", new Document()
                                     .append("name", rowHeadingsList.get(0))
                                     .append("type", "label")

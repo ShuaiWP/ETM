@@ -1,27 +1,13 @@
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import com.mongodb.client.MongoClients;
 import dataParser.DataParser;
 import docGenerator.DocGenerator;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.bson.Document;
 import reader.ExcelReader;
-import utils.CommonUtil;
+
 
 
 public class ExcelToMongoDB {
@@ -35,17 +21,22 @@ public class ExcelToMongoDB {
      * @param filepath 需要转换的Excel文件的路径名字
      */
     public static void run(String filepath){
+        DataParser dataParser = new DataParser();
         String sheetName = "Sheet1";
 
         //todo 读取excel信息
         ArrayList<ArrayList<String>> excelDataList = ExcelReader.read(filepath);
 
         //todo DataParse,进行格式解析
-        ArrayList<String> rowHeadingsList = new ArrayList<>();
-        int firstDataRowIndex = DataParser.multipleRowTitleParser(excelDataList, rowHeadingsList);
+        dataParser.setExcelDataList(excelDataList);
+        dataParser.parse();
+        ArrayList<String> rowHeadingsList = dataParser.getRowHeadingsList();      //第一行的合并后的分级标题
+        ArrayList<String> colHeadingsList = dataParser.getColHeadingsList();      //第一列的合并后的分级标题
+        int firstDataRowIndex = dataParser.getFirstDataRowIndex();
 
         //todo 生成document对象
-        Document document = DocGenerator.get(excelDataList, rowHeadingsList, firstDataRowIndex);
+        Document document = DocGenerator.get(excelDataList, rowHeadingsList, firstDataRowIndex,
+                dataParser.getTotalUnit());
 
         //todo 将document存储进MongoDB中
         //配置MongoDB信息

@@ -5,20 +5,32 @@ import utils.CommonUtil;
 import java.util.ArrayList;
 
 public class DataParser {
+    private ArrayList<ArrayList<String>> excelDataList = null;
+    private int lastHeadingsRowIndex = 0;       //最后一级行标题的index
+    private int unitRowIndex = 0;       //表格单位所在行
+    private int firstDataRowIndex = 0;  //第一行
+    private String totalUnit = "";  //全表的总体单位
+    private ArrayList<String> rowHeadingsList = new ArrayList<>();
+    private ArrayList<String> colHeadingsList = new ArrayList<>();
+
     /**
      * DataParser之一，适配于多层级行标题，但是需要顶层行标题是合并单元格的
      * 解析方法：从最下层行标题往上合并，中间用“-”隔开
-     * @param data excelReader生成的数据列表
-     * @param rowHeadingsList 合并完格式的行标题列表，比如“县级-县”
-     * @return data中数据部分的第一行index
      */
-    public static int multipleRowTitleParser(ArrayList<ArrayList<String>> data, ArrayList<String> rowHeadingsList){
-        //定位最后一行子标题的位置
-        int lastHeadingsRowIndex = 0;
+    public void parse(){
+        //todo 获取基本参数: lastHeadingsRowIndex，unitRowIndex，totalUnit
+        getBasicParam();
+
+        //todo 合并第一行标题和第一列标题
+        mergeRowHeadings();
+        mergeColHeadings();
+
+    }
+
+    public void getBasicParam(){
         int nullRowCount = 0;
-        int unitRowIndex = 0;
-        for (int i = 0; i < data.size(); i++){
-            ArrayList<String> curRow = data.get(i);
+        for (int i = 0; i < excelDataList.size(); i++){
+            ArrayList<String> curRow = excelDataList.get(i);
             if (CommonUtil.isNullRow(curRow)){
                 //之前是否已经有一段空白行了
                 if (nullRowCount == 1){
@@ -26,16 +38,20 @@ public class DataParser {
                     break;
                 }else{
                     //下一行是否还是空白行
-                    if(!CommonUtil.isNullRow(data.get(i + 1))){
+                    if(!CommonUtil.isNullRow(excelDataList.get(i + 1))){
                         nullRowCount++;
                         unitRowIndex = i + 1;
                     }
                 }
             }
         }
+        firstDataRowIndex = lastHeadingsRowIndex + 2;
+        totalUnit = excelDataList.get(unitRowIndex).get(0);
+    }
 
+    public void mergeRowHeadings(){
         //合并rowHeadings
-        ArrayList<String> lastHeadingsRow = data.get(lastHeadingsRowIndex);
+        ArrayList<String> lastHeadingsRow = excelDataList.get(lastHeadingsRowIndex);
 //        rowHeadingsList = new ArrayList<>(lastHeadingsRow);
         for (String s : lastHeadingsRow)
             rowHeadingsList.add(s);
@@ -48,8 +64,8 @@ public class DataParser {
             lastSonHeading = curHeadings;
             int upRow = lastHeadingsRowIndex - 1;
             while(upRow > unitRowIndex){
-                if (i < data.get(upRow).size()) {
-                    String curSonHeading = data.get(upRow).get(i);
+                if (i < excelDataList.get(upRow).size()) {
+                    String curSonHeading = excelDataList.get(upRow).get(i);
                     if (!curSonHeading.equals("") && !curHeadings.contains(curSonHeading)){
                         lastSonHeading = curSonHeading;
                         if (!curHeadings.equals("")) {
@@ -63,10 +79,43 @@ public class DataParser {
             rowHeadingsList.set(i, curHeadings);
         }
 
-        String unitCell = data.get(unitRowIndex).get(0);
+        String unitCell = excelDataList.get(unitRowIndex).get(0);
         rowHeadingsList.add(unitCell.substring(unitCell.indexOf("：")+1));
-
-        return lastHeadingsRowIndex + 2;
     }
 
+    public void mergeColHeadings(){
+
+    }
+
+    public ArrayList<ArrayList<String>> getExcelDataList() {
+        return excelDataList;
+    }
+
+    public int getLastHeadingsRowIndex() {
+        return lastHeadingsRowIndex;
+    }
+
+    public int getUnitRowIndex() {
+        return unitRowIndex;
+    }
+
+    public int getFirstDataRowIndex() {
+        return firstDataRowIndex;
+    }
+
+    public String getTotalUnit() {
+        return totalUnit;
+    }
+
+    public ArrayList<String> getRowHeadingsList() {
+        return rowHeadingsList;
+    }
+
+    public ArrayList<String> getColHeadingsList() {
+        return colHeadingsList;
+    }
+
+    public void setExcelDataList(ArrayList<ArrayList<String>> excelDataList) {
+        this.excelDataList = excelDataList;
+    }
 }

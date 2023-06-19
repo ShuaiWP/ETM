@@ -15,13 +15,13 @@ public class ExcelReader {
      * @param fileName  excel文件路径
      * @return ArrayList<ArrayList<String>>形式的数据
      */
-    public static ArrayList<ArrayList<String>> read(String fileName) {
+    public static ArrayList<ArrayList<String>> read(String fileName, int sheetIndex) {
         ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 
         try {
             FileInputStream file = new FileInputStream(new File(fileName));
             Workbook workbook = WorkbookFactory.create(file);
-            Sheet sheet = workbook.getSheetAt(1); // 获取第一个工作表
+            Sheet sheet = workbook.getSheetAt(sheetIndex); // 获取第n个工作表
 
             // 获取所有的合并单元格区域
             int mergedRegions = sheet.getNumMergedRegions();
@@ -74,7 +74,10 @@ public class ExcelReader {
                             }
                         }
                     }
-                    rowData.add(cellValue.trim());
+                    if (cell.getColumnIndex() == 0)
+                        rowData.add(cellValue);
+                    else
+                        rowData.add(cellValue.trim());
                 }
                 data.add(rowData);
             }

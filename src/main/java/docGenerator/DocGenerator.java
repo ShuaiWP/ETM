@@ -23,7 +23,7 @@ public class DocGenerator {
          */
         Document doc = new Document()
                 .append("name", "中国统计年鉴")
-                .append("year", "2012")
+                .append("year", "2009")
                 .append("address", "全国")
                 .append("execel_name", excelDataList.get(0).get(0))
                 .append("industry", "综合");

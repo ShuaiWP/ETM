@@ -1,5 +1,7 @@
 package dataParser;
 
+import utils.BorderCell;
+import utils.BorderWrapper;
 import utils.ColHeadingWrapper;
 import utils.CommonUtil;
 
@@ -8,11 +10,12 @@ import java.util.ArrayList;
 public class DataParser {
     private ArrayList<ArrayList<String>> excelDataList = null;
     private int lastHeadingsRowIndex = 0;       //最后一级行标题的index
-    private int unitRowIndex = 0;       //表格单位所在行
+    private int firstHeadingsRowIndex = 0;       //表格第一行行标题所在行
     private int firstDataRowIndex = 0;  //第一行
     private String totalUnit = "";  //全表的总体单位
     private ArrayList<String> rowHeadingsList = new ArrayList<>();
     private ArrayList<ColHeadingWrapper> colHeadingsList = new ArrayList<>();
+    private BorderWrapper borderWrapper;
 
     /**
      * DataParser之一，适配于多层级行标题，但是需要顶层行标题是合并单元格的
@@ -29,32 +32,49 @@ public class DataParser {
     }
 
     /**
-     * 获取基本信息，包括lastHeadingsRowIndex，firstDataRowIndex，unitRowIndex，totalUnit
+     * 获取基本信息，包括lastHeadingsRowIndex，firstDataRowIndex，firstHeadingsRowIndex，totalUnit
      */
     public void getBasicParam(){
-        int nullRowCount = 0;
-        for (int i = 0; i < excelDataList.size(); i++){
-            ArrayList<String> curRow = excelDataList.get(i);
-            if (CommonUtil.isNullRow(curRow)){
-                //之前是否已经有一段空白行了
-                if (nullRowCount == 1){
-                    lastHeadingsRowIndex = i - 1;
-                    break;
-                }else{
-                    //下一行是否还是空白行
-                    if(!CommonUtil.isNullRow(excelDataList.get(i + 1))){
-                        nullRowCount++;
-                        unitRowIndex = i + 1;
-                    }
-                }
+        //逐行遍历，去寻找firstHeadingsRowIndex
+        for (int i = 0; i < borderWrapper.getBorderList().size(); i++){
+            if (borderWrapper.isExistUpBorder_row(i)){
+                this.firstHeadingsRowIndex = i;
+                break;
             }
         }
 
-        firstDataRowIndex = lastHeadingsRowIndex + 2;
+        //从最后一行往上遍历，去寻找倒数第二条borderRow,作为lastHeadingsRowIndex
+        boolean flag = false;   //用于判断是否已经遍历过最后一根borderRow，去寻找倒数第二根
+        for (int i = borderWrapper.getBorderList().size() - 1; i > firstHeadingsRowIndex; i--){
+            if (borderWrapper.isExistUpBorder_row(i)){
+                if (flag) {
+                    this.lastHeadingsRowIndex = i - 1;
+                    break;
+                }
+                else
+                    flag = true;
+            }
+        }
 
-        String unitCell = excelDataList.get(unitRowIndex).get(0);
-        if (unitCell.contains("单位")) {
-            totalUnit = unitCell.substring(unitCell.indexOf("：") + 1);
+        //根据lastHeadingsRowIndex去寻找firstDataRowIndex
+        for (int i = lastHeadingsRowIndex + 1; i < borderWrapper.getBorderList().size(); i++) {
+            if (!CommonUtil.isNullRow(excelDataList.get(i))){
+                this.firstDataRowIndex = i;
+                break;
+            }
+        }
+
+        //寻找TotalUnit
+        for (int i = 0; i < firstHeadingsRowIndex; i++){
+            ArrayList<String> curRow = excelDataList.get(i);
+            if (!CommonUtil.isNullRow(curRow)){
+                for (String curCell : curRow) {
+                    if (curCell.contains("单位")) {
+                        totalUnit = curCell.substring(curCell.indexOf("：") + 1);
+                        break;
+                    }
+                }
+            }
         }
     }
 
@@ -75,7 +95,7 @@ public class DataParser {
             String curHeadings = lastHeadingsRow.get(i);
             lastSonHeading = curHeadings;
             int upRow = lastHeadingsRowIndex - 1;
-            while(upRow > unitRowIndex){
+            while(upRow >= firstHeadingsRowIndex){
                 if (i < excelDataList.get(upRow).size()) {
                     String curSonHeading = excelDataList.get(upRow).get(i);
                     if (!curSonHeading.equals("") && !curHeadings.contains(curSonHeading)){
@@ -102,33 +122,43 @@ public class DataParser {
         //对分层标题进行合并
         int curRank = -1;
         for (int i = 0; i < colHeadingsList.size(); i++){
-            curRank  = colHeadingsList.get(i).getPreBlankNum();
-            String res = colHeadingsList.get(i).getContent();
+            ColHeadingWrapper curCellWrapper = colHeadingsList.get(i);
+            curRank  = curCellWrapper.getPreBlankNum();
+            String res = curCellWrapper.getContent();
             //1. 判断当前层是否是子表标题，即curRank == 0
             if (curRank == 0){
-                colHeadingsList.get(i).setColHeading(res);
-                colHeadingsList.get(i).setName(res);
+                curCellWrapper.setColHeading(res);
+                curCellWrapper.setName(res);
                 continue;
             }
 
             //2. 逐层向上合并
             for (int j = i - 1; j >= 0; j--){
+                //跳过空行
+                if (colHeadingsList.get(j).getIndex() == -1)
+                    continue;
+
                 int preRank = colHeadingsList.get(j).getPreBlankNum();
 
                 //判断j层层级是否高于curRank
                 if (preRank < curRank){
                     curRank = preRank;
                     res = colHeadingsList.get(j).getContent() + "-" + res;
-                    if (colHeadingsList.get(i).getUnit().equals("") && !colHeadingsList.get(j).getUnit().equals("")){
-                        colHeadingsList.get(i).setUnit(colHeadingsList.get(j).getUnit());
+                    if (curCellWrapper.getUnit().equals("") && !colHeadingsList.get(j).getUnit().equals("")){
+                        curCellWrapper.setUnit(colHeadingsList.get(j).getUnit());
                     }
+                    curCellWrapper.setName(colHeadingsList.get(j).getContent());
+                    curCellWrapper.setColHeading(res.substring(res.indexOf("-")+1));
                     if (preRank == 0) {
-                        colHeadingsList.get(i).setName(colHeadingsList.get(j).getContent());
-                        colHeadingsList.get(i).setColHeading(res.substring(res.indexOf("-")+1));
                         break;
                     }
                 }
             }
+
+            //3.如果上面层中都没有父层级，则直接把该cell的content当成colHeading
+            curCellWrapper.setColHeading(curCellWrapper.getContent());
+            if (CommonUtil.isNullStr(curCellWrapper.getName()))
+                curCellWrapper.setName(excelDataList.get(lastHeadingsRowIndex).get(0));
         }
     }
 
@@ -168,8 +198,8 @@ public class DataParser {
         return lastHeadingsRowIndex;
     }
 
-    public int getUnitRowIndex() {
-        return unitRowIndex;
+    public int getFirstHeadingsRowIndex() {
+        return firstHeadingsRowIndex;
     }
 
     public int getFirstDataRowIndex() {
@@ -190,5 +220,13 @@ public class DataParser {
 
     public void setExcelDataList(ArrayList<ArrayList<String>> excelDataList) {
         this.excelDataList = excelDataList;
+    }
+
+    public BorderWrapper getBorderWrapper() {
+        return borderWrapper;
+    }
+
+    public void setBorderWrapper(BorderWrapper borderWrapper) {
+        this.borderWrapper = borderWrapper;
     }
 }

@@ -27,6 +27,7 @@ public class ExcelToMongoDB {
         CommonUtil.searchXLSXFiles(dicPath, pathList);
         int sheetIndex = 0;
 
+
         String dbURL = "mongodb://localhost:27017";
         String dbName = "testdb";
 

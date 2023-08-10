@@ -19,7 +19,7 @@ public class BorderWrapper {
      * 设置边界线列表信息
      * @param filepath 表格文件路径
      */
-    public void setBorderList(String filepath) throws IOException {
+    public void setBorderList(String filepath, int sheetIndex) throws IOException {
         // 创建文件对象
         File file = new File(filepath);
 
@@ -30,7 +30,7 @@ public class BorderWrapper {
         XSSFWorkbook workbook = new XSSFWorkbook(fis);
 
         // 获取第一个工作表
-        XSSFSheet sheet = workbook.getSheetAt(0);
+        XSSFSheet sheet = workbook.getSheetAt(sheetIndex);
 
         // 遍历每一行
         for (Row row : sheet) {
@@ -54,15 +54,15 @@ public class BorderWrapper {
                     if (style.getBorderLeftEnum() != BorderStyle.NONE) {
                         curBorderCell.setLeft(true);
                     }
-//                    // 检查单元格右侧边框线
-//                    if (style.getBorderRightEnum() != BorderStyle.NONE) {
-//                        // 输出右侧边框线位置
-//                        System.out.printf("Right border: %d,%d%n", row.getRowNum(), cell.getColumnIndex());
-//                    }
+                    // 检查单元格右侧边框线
+                    if (style.getBorderRightEnum() != BorderStyle.NONE) {
+                        curBorderCell.setRight(true);
+                    }
                 }
                 borderRowList.add(curBorderCell);
             }
-            this.borderList.add(borderRowList);
+            if (borderRowList.size() > 0)
+                this.borderList.add(borderRowList);
         }
 
         // 关闭工作簿和文件输入流
@@ -74,21 +74,43 @@ public class BorderWrapper {
         boolean res = this.borderList.get(row).get(col).isExistUpBorder();
         if (res)
             return true;
-        else if (row > 0)
+        else if (row > 0 && col < borderList.get(row-1).size())
             return this.borderList.get(row-1).get(col).isExistBottom();
         else
             return false;
     }
 
+    public boolean isExistBottomBorder_cell(int row, int col){
+        return this.borderList.get(row).get(col).isExistBottom();
+    }
+
     public boolean isExistLeftBorder_cell(int row, int col){
-        return this.borderList.get(row).get(col).isExistLeftBorder();
+        boolean res = this.borderList.get(row).get(col).isExistLeftBorder();
+        if (res)
+            return true;
+        else if (col > 0)
+            return this.borderList.get(row).get(col-1).isExistRight();
+        else
+            return false;
     }
 
     public boolean isExistUpBorder_row(int row){
         boolean res = true;
 
-        for (int i = 0; i < borderList.get(0).size(); i++){
+        for (int i = 0; i < borderList.get(row).size(); i++){
             if (!isExistUpBorder_cell(row, i)){
+                res =false;
+                break;
+            }
+        }
+        return res;
+    }
+
+    public boolean isExistBottomBorder_row(int row){
+        boolean res = true;
+
+        for (int i = 0; i < borderList.get(row).size(); i++){
+            if (!this.borderList.get(row).get(i).isExistBottom()){
                 res =false;
                 break;
             }

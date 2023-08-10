@@ -19,6 +19,26 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CommonUtil {
+    public static void searchXLSXFiles(String folderPath, ArrayList<String> xlsxFiles) {
+        File folder = new File(folderPath);
+
+        if (folder.isDirectory()) {
+            File[] files = folder.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isFile() && file.getName().endsWith(".xlsx")) {
+                        xlsxFiles.add(file.getAbsolutePath());
+                    } else if (file.isDirectory()) {
+                        searchXLSXFiles(file.getAbsolutePath(), xlsxFiles); // 递归搜索子文件夹
+                    }
+                }
+            }
+        } else if (folder.isFile()) {
+            xlsxFiles.add(folderPath);
+        }
+    }
+
+
     /**
      * 判断某一行是否为空
      * @param rowData exceldata中的一行数据

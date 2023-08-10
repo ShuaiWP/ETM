@@ -76,12 +76,12 @@ public class ExcelReader {
                             }
                         }
                     }
-                    if (cell.getColumnIndex() == 0)
-                        rowData.add(cellValue);
-                    else
-                        rowData.add(cellValue.trim());
+                    if (cell.getColumnIndex() != 0)
+                        cellValue = cellValue.trim();
+                    rowData.add(cellValue.replaceAll("[\\n\\r]", " "));
                 }
-                data.add(rowData);
+                if (rowData.size() > 0)
+                    data.add(rowData);
             }
 
             workbook.close();

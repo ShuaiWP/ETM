@@ -13,7 +13,9 @@ public class DocGenerator {
                                ArrayList<String> rowHeadingsList,
                                ArrayList<ColHeadingWrapper> colHeadingsList,
                                int firstDataRowIndex,
-                               String totalUnit){
+                               String totalUnit,
+                               String year,
+                               String excelName){
         /**
          * "name":“中国统计年鉴”，
          * "year":"2012"
@@ -23,9 +25,9 @@ public class DocGenerator {
          */
         Document doc = new Document()
                 .append("name", "中国统计年鉴")
-                .append("year", "2009")
+                .append("year", year)
                 .append("address", "全国")
-                .append("execel_name", excelDataList.get(0).get(0))
+                .append("excel_name", excelName)
                 .append("industry", "综合");
 
         //存储data数据

@@ -51,9 +51,11 @@ public class ExcelToMongoDB {
         ArrayList<ArrayList<String>> excelDataList = ExcelReader.read(filepath, sheetIndex);
         BorderWrapper borderWrapper = new BorderWrapper();
         borderWrapper.setBorderList(filepath, sheetIndex);
+//        int rowBorderLineNum = borderWrapper.getRowBorderLineNum();
 
         //todo 对file进行归类
-        String fileClass = "factory.DefaultParserFactory";
+        FileClassifier fileClassifier = new FileClassifier(excelDataList, borderWrapper, filepath);
+        String fileClass = fileClassifier.classify();
 
         //todo 获取对应parser，并解析
         AbstractParser parser = AbstractParserFactory.getParserFactory(fileClass).getParser(excelDataList, borderWrapper, filepath);

@@ -45,31 +45,28 @@ public class DefaultParser extends AbstractParser {
      * 获取基本信息，包括lastHeadingsRowIndex，firstDataRowIndex，firstHeadingsRowIndex，totalUnit, excelName
      */
     public void getBasicParam(){
-        //逐行遍历，去寻找firstHeadingsRowIndex
-        for (int i = 0; i < borderWrapper.getBorderList().size(); i++){
-            if (borderWrapper.isExistUpBorder_row(i)){
-                this.firstHeadingsRowIndex = i;
-                break;
-            }
-        }
+        this.firstHeadingsRowIndex = borderWrapper.getFirstHeadingsRowIndex();
 
         //从最后一行往上遍历，去寻找倒数第二条borderRow,作为lastHeadingsRowIndex
-        boolean flag = false;   //用于判断是否已经遍历过最后一根borderRow，去寻找倒数第二根
-        for (int i = borderWrapper.getBorderList().size() - 1; i > firstHeadingsRowIndex; i--){
-            if (borderWrapper.isExistUpBorder_row(i) || borderWrapper.isExistBottomBorder_row(i-1)){
-                if (flag) {
-                    this.lastHeadingsRowIndex = i - 1;
-                    break;
-                }
-                else
-                    flag = true;
-            }else if (i == borderWrapper.getBorderList().size()-1 && !flag){       //考虑到有些表格没有附加信息，最后一根边界在最后一行下方
-                if (borderWrapper.isExistBottomBorder_row(i))
-                    flag = true;
-            }
-        }
+//        boolean flag = false;   //用于判断是否已经遍历过最后一根borderRow，去寻找倒数第二根
+//        for (int i = borderWrapper.getBorderList().size() - 1; i > firstHeadingsRowIndex; i--){
+//            if (borderWrapper.isExistUpBorder_row(i) || borderWrapper.isExistBottomBorder_row(i-1)){
+//                if (flag) {
+//                    this.lastHeadingsRowIndex = i - 1;
+//                    break;
+//                }
+//                else
+//                    flag = true;
+//            }else if (i == borderWrapper.getBorderList().size()-1 && !flag){       //考虑到有些表格没有附加信息，最后一根边界在最后一行下方
+//                if (borderWrapper.isExistBottomBorder_row(i))
+//                    flag = true;
+//            }
+//        }
 
         //根据lastHeadingsRowIndex去寻找firstDataRowIndex
+
+        this.lastHeadingsRowIndex = borderWrapper.getLastHeadingsRowIndex(firstHeadingsRowIndex);
+
         for (int i = lastHeadingsRowIndex + 1; i < borderWrapper.getBorderList().size(); i++) {
             if (!CommonUtil.isNullRow(excelDataList.get(i))){
                 this.firstDataRowIndex = i;

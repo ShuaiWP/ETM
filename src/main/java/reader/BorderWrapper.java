@@ -71,6 +71,48 @@ public class BorderWrapper {
         fis.close();
     }
 
+    public int getFirstHeadingsRowIndex(){
+        //逐行遍历，去寻找firstHeadingsRowIndex
+        for (int i = 0; i < borderList.size(); i++){
+            if (isExistUpBorder_row(i)){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public int getLastHeadingsRowIndex(int firstHeadingsRowIndex){
+        //从最后一行往上遍历，去寻找倒数第二条borderRow,作为lastHeadingsRowIndex
+        boolean flag = false;   //用于判断是否已经遍历过最后一根borderRow，去寻找倒数第二根
+        for (int i = borderList.size() - 1; i > firstHeadingsRowIndex; i--){
+            if (isExistUpBorder_row(i) || isExistBottomBorder_row(i-1)){
+                if (flag) {
+                    return i - 1;
+                }
+                else
+                    flag = true;
+            }else if (i == getBorderList().size()-1 && !flag){       //考虑到有些表格没有附加信息，最后一根边界在最后一行下方
+                if (isExistBottomBorder_row(i))
+                    flag = true;
+            }
+        }
+        return  -1;
+    }
+
+    public int getRowBorderLineNum(){
+        int num = 0;
+        for (int i = 0; i < borderList.size(); i++){
+            if (i == borderList.size() -1){
+                if (isExistBottomBorder_row(i))
+                    num++;
+            }else {
+                if (isExistBottomBorder_row(i) || isExistUpBorder_row(i+1))
+                    num++;
+            }
+        }
+        return num;
+    }
+
     public boolean isExistUpBorder_cell(int row, int col){
         boolean res = this.borderList.get(row).get(col).isExistUpBorder();
         if (res)

@@ -1,25 +1,28 @@
-package dataParser;
+package parser.defaultParser;
 
-import utils.BorderCell;
-import utils.BorderWrapper;
+import lombok.Data;
+import org.bson.Document;
+import parser.AbstractParser;
 import utils.ColHeadingWrapper;
 import utils.CommonUtil;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class DataParser {
-    private ArrayList<ArrayList<String>> excelDataList = null;
+@Data
+public class DefaultParser extends AbstractParser {
     private int lastHeadingsRowIndex = 0;       //最后一级行标题的index
     private int firstHeadingsRowIndex = 0;       //表格第一行行标题所在行
     private int firstDataRowIndex = 0;  //第一行
     private String totalUnit = "";  //全表的总体单位
     private ArrayList<String> rowHeadingsList = new ArrayList<>();
     private ArrayList<ColHeadingWrapper> colHeadingsList = new ArrayList<>();
-    private BorderWrapper borderWrapper;
     private String excelName;
-    private String path;
 
-    public void parse(){
+    @Override
+    public Document getDocument() {
         //todo 获取基本参数
         getBasicParam();
 
@@ -27,7 +30,16 @@ public class DataParser {
         mergeRowHeadings();
         mergeColHeadings();
 
+        System.out.println("==============="+ excelName +"===============");
+        for (String s : rowHeadingsList) {
+            System.out.println(s);
+        }
+
+
+        //todo 获取document
+        return generateDocument();
     }
+
 
     /**
      * 获取基本信息，包括lastHeadingsRowIndex，firstDataRowIndex，firstHeadingsRowIndex，totalUnit, excelName
@@ -83,49 +95,17 @@ public class DataParser {
         }
 
         //解析出excelName
-        excelName = path.substring(path.lastIndexOf("\\")+1);
+        excelName = filepath.substring(filepath.lastIndexOf("\\")+1);
     }
 
     /**
      * 合并第一行标题列表
      */
-//    public void mergeRowHeadings(){
-//        //合并rowHeadings
-//        ArrayList<String> lastHeadingsRow = excelDataList.get(lastHeadingsRowIndex);
-////        rowHeadingsList = new ArrayList<>(lastHeadingsRow);
-//        for (String s : lastHeadingsRow)
-//            rowHeadingsList.add(s);
-//
-//        rowHeadingsList.set(0, lastHeadingsRow.get(0));  //设置第一列的行标题
-//        //找到之后每一列的headings
-//        String lastSonHeading = "";
-//        for(int i = 1; i < lastHeadingsRow.size(); i++){
-//            String curHeadings = lastHeadingsRow.get(i);
-//            lastSonHeading = curHeadings;
-//            int upRow = lastHeadingsRowIndex - 1;
-//            while(upRow >= firstHeadingsRowIndex){
-//                if (i < excelDataList.get(upRow).size()) {
-//                    String curSonHeading = excelDataList.get(upRow).get(i);
-//                    if (!curSonHeading.equals("") && !curHeadings.contains(curSonHeading)){
-//                        lastSonHeading = curSonHeading;
-//                        if (!curHeadings.equals("")) {
-//                            curHeadings = curSonHeading + "-" + curHeadings;
-//                        }else
-//                            curHeadings = curSonHeading;
-//                    }
-//                }
-//                upRow--;
-//            }
-//            rowHeadingsList.set(i, curHeadings);
-//        }
-//    }
-
     public void mergeRowHeadings(){
         //合并rowHeadings
         ArrayList<String> lastHeadingsRow = excelDataList.get(lastHeadingsRowIndex);
 //        rowHeadingsList = new ArrayList<>(lastHeadingsRow);
-        for (String s : lastHeadingsRow)
-            rowHeadingsList.add(s);
+        rowHeadingsList.addAll(lastHeadingsRow);
 
         rowHeadingsList.set(0, lastHeadingsRow.get(0));  //设置第一列的行标题
 
@@ -281,55 +261,65 @@ public class DataParser {
         }
     }
 
-    public ArrayList<ArrayList<String>> getExcelDataList() {
-        return excelDataList;
-    }
+    public Document generateDocument(){
 
-    public int getLastHeadingsRowIndex() {
-        return lastHeadingsRowIndex;
-    }
+        String year = "";
+        Pattern pattern = Pattern.compile("\\\\(\\d{4})\\\\");
+        Matcher matcher = pattern.matcher(filepath);
+        while (matcher.find()) {
+            year = matcher.group(1);
+        }
 
-    public int getFirstHeadingsRowIndex() {
-        return firstHeadingsRowIndex;
-    }
+        /**
+         * "name":“中国统计年鉴”，
+         * "year":"2012"
+         * "address":“全国”
+         * "execel_name":“私人汽车拥有量”，//excel名
+         * "industry”:“运输和邮电”,//行业分组
+         */
+        Document doc = new Document()
+                .append("name", "中国统计年鉴")
+                .append("year", year)
+                .append("address", "全国")
+                .append("excel_name", excelName)
+                .append("industry", "综合");
 
-    public int getFirstDataRowIndex() {
-        return firstDataRowIndex;
-    }
+        //存储data数据
+        // 创建数据列表
+        List<Document> dataDoc = new ArrayList<>();
+        for(int i = firstDataRowIndex; i < excelDataList.size(); i++){
+            ArrayList<String> curRowData = excelDataList.get(i);
+            //如果该行数据全为空，则跳过该行，对下一行进行处理
+            if (CommonUtil.isNullDataRow(curRowData)){
+                continue;
+            }
 
-    public String getTotalUnit() {
-        return totalUnit;
-    }
+            for (int j = 1; j < curRowData.size(); j++) {
+                if (!curRowData.get(j).equals("")) {
+                    Document itemDoc = new Document();
+                    ColHeadingWrapper curColHeading = colHeadingsList.get(i - firstDataRowIndex);
+                    //1.附加单位
+                    if (!curColHeading.getUnit().equals("")){
+                        itemDoc.append("unit", curColHeading.getUnit());
+                    }else {
+                        itemDoc.append("unit", totalUnit);
+                    }
 
-    public ArrayList<String> getRowHeadingsList() {
-        return rowHeadingsList;
-    }
+                    //2. 附加row和col
+                    itemDoc.append("row", new Document()
+                                    .append("name", curColHeading.getName())
+                                    .append("type", "label")
+                                    .append("value", curColHeading.getColHeading()))
+                            .append("col", new Document()
+                                    .append("name", rowHeadingsList.get(j))
+                                    .append("type", "label")
+                                    .append("value", curRowData.get(j)));
+                    dataDoc.add(itemDoc);
+                }
+            }
+        }
+        doc.append("data", dataDoc);
 
-    public ArrayList<ColHeadingWrapper> getColHeadingsList() {
-        return colHeadingsList;
-    }
-
-    public void setExcelDataList(ArrayList<ArrayList<String>> excelDataList) {
-        this.excelDataList = excelDataList;
-    }
-
-    public BorderWrapper getBorderWrapper() {
-        return borderWrapper;
-    }
-
-    public void setBorderWrapper(BorderWrapper borderWrapper) {
-        this.borderWrapper = borderWrapper;
-    }
-
-    public String getExcelName() {
-        return excelName;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
+        return doc;
     }
 }

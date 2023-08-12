@@ -1,4 +1,4 @@
-package utils;
+package reader;
 
 public class BorderCell{
     private boolean up;

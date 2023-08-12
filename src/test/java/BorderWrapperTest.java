@@ -1,5 +1,5 @@
 import org.junit.Test;
-import utils.BorderWrapper;
+import reader.BorderWrapper;
 
 import java.io.IOException;
 

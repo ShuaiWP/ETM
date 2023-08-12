@@ -44,17 +44,34 @@ public class FileClassifier {
 
     /**
      * 判断标准：
-     *  1.表中一共只有三条rowBorderLine
-     *  2.lastHeadingsRowIndex 不小于 firstHeadingsRowIndex
+     *  1.lastHeadingsRowIndex 不小于 firstHeadingsRowIndex
+     *  2.表中一共只有三条rowBorderLine
+     *  3.不存在空列
      */
     public boolean defaultFileJudge() {
         int firstHeadingsRowIndex = borderWrapper.getFirstHeadingsRowIndex();
         int lastHeadingsRowIndex = borderWrapper.getLastHeadingsRowIndex(firstHeadingsRowIndex);
-        //
+        // 1
         if (firstHeadingsRowIndex < 0 || lastHeadingsRowIndex < 0 ||lastHeadingsRowIndex < firstHeadingsRowIndex)
             return false;
+
+        // 2
         if (borderWrapper.getRowBorderLineNum() != 3)
             return false;
+
+        // 3
+        for (int i = 0; i < excelDataList.get(0).size(); i++){
+            boolean flag = true;
+            for (ArrayList<String> row : excelDataList) {
+                if (!row.get(i).isEmpty()) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag)
+                return false;
+        }
+
         return true;
     }
 }

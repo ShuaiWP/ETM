@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class FileClassifierTest {
     @Test
     public void test() throws IOException {
-        String dicPath = "D:\\projects\\ETM-main\\年鉴数据分析\\data\\data_xlsx\\2020";
+        String dicPath = "D:\\projects\\ETM-main\\年鉴数据分析\\data\\data_xlsx\\2021";
         ArrayList<String> pathList = new ArrayList<>();
         CommonUtil.searchXLSXFiles(dicPath, pathList);
         int sheetIndex = 0;

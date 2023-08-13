@@ -84,7 +84,7 @@ public class BorderWrapper {
     public int getLastHeadingsRowIndex(int firstHeadingsRowIndex){
         //从最后一行往上遍历，去寻找倒数第二条borderRow,作为lastHeadingsRowIndex
         boolean flag = false;   //用于判断是否已经遍历过最后一根borderRow，去寻找倒数第二根
-        for (int i = borderList.size() - 1; i > firstHeadingsRowIndex; i--){
+        for (int i = borderList.size() - 1; i > firstHeadingsRowIndex && i > 0; i--){
             if (isExistUpBorder_row(i) || isExistBottomBorder_row(i-1)){
                 if (flag) {
                     return i - 1;

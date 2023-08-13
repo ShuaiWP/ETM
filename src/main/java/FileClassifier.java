@@ -21,13 +21,15 @@ public class FileClassifier {
     }
 
     public String classify() {
-        if (continuedSheetFileJudge())
+        if (continuedSheetFileJudge())              //续表判断
             return classNameMap.get("continuedSheet");
         else if (defaultFileJudge())
-            return classNameMap.get("default");
+            return classNameMap.get("default");     //default表格
         else
-            throw new IllegalArgumentException(filepath + "   未定义类型文件！！！");
+            throw new IllegalArgumentException("error: " + filepath);
+//            return "error: " + filepath;
     }
+
 
     /**
      * 判断标准：有无续表
@@ -52,12 +54,16 @@ public class FileClassifier {
         int firstHeadingsRowIndex = borderWrapper.getFirstHeadingsRowIndex();
         int lastHeadingsRowIndex = borderWrapper.getLastHeadingsRowIndex(firstHeadingsRowIndex);
         // 1
-        if (firstHeadingsRowIndex < 0 || lastHeadingsRowIndex < 0 ||lastHeadingsRowIndex < firstHeadingsRowIndex)
+        if (firstHeadingsRowIndex < 0 || lastHeadingsRowIndex < 0 ||lastHeadingsRowIndex < firstHeadingsRowIndex) {
+//            System.out.println("\t *** Illegal row index ***");
             return false;
+        }
 
         // 2
-        if (borderWrapper.getRowBorderLineNum() != 3)
+        if (borderWrapper.getRowBorderLineNum() != 3) {
+//            System.out.println("\t *** borderLine ！= 3 ***");
             return false;
+        }
 
         // 3
         for (int i = 0; i < excelDataList.get(0).size(); i++){
@@ -68,8 +74,10 @@ public class FileClassifier {
                     break;
                 }
             }
-            if (flag)
+            if (flag) {
+//                System.out.println("\t *** exist null col "+ i + " ***");
                 return false;
+            }
         }
 
         return true;

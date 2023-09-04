@@ -1,18 +1,10 @@
-package utils;
+package com.iscas.etm.excelParser.utils;
 
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.BorderStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import com.iscas.etm.excelParser.reader.BorderCell;
+import com.iscas.etm.excelParser.reader.BorderWrapper;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -105,7 +97,7 @@ public class CommonUtil {
         Pattern pattern = Pattern.compile("\\((.*?)\\)");
         Matcher matcher = pattern.matcher(s);
         while (matcher.find()) {
-            if (res.toString().equals(""))
+            if (res.toString().isEmpty())
                 res.append(matcher.group(1));
             else
                 res.append("-").append(matcher.group(1));
@@ -115,5 +107,40 @@ public class CommonUtil {
 
     public static boolean isNullStr(String s){
         return s == null || s.equals("");
+    }
+
+
+    public static ArrayList<ArrayList<String>> cutExcelDataList(ArrayList<ArrayList<String>> excelDataList, int row,
+                                                                int col, int rowLen, int colLen){
+        ArrayList<ArrayList<String>> sonList = new ArrayList<>();
+
+        for (int i = row; i <= Math.min(row + rowLen, excelDataList.size()-1); i++){
+            ArrayList<String> rowList = new ArrayList<>();
+            for (int j = col; j <= Math.min(col + colLen, excelDataList.get(i).size()-1); j++){
+                if (excelDataList.get(i).get(j).contains("续表"))
+                    rowList.add("");
+                else
+                    rowList.add(excelDataList.get(i).get(j));
+            }
+            if (!rowList.isEmpty())
+                sonList.add(rowList);
+        }
+        return sonList;
+    }
+
+    public static BorderWrapper cutBorderWrapper(BorderWrapper borderWrapper, int row,
+                                                 int col, int rowLen, int colLen){
+        BorderWrapper sonBorderWrapper = new BorderWrapper();
+
+        for (int i = row; i <= Math.min(row + rowLen, borderWrapper.getBorderList().size()-1); i++){
+            ArrayList<BorderCell> rowList = new ArrayList<>();
+            for (int j = col; j <= Math.min(col + colLen, borderWrapper.getBorderList().get(i).size()-1); j++){
+                rowList.add(borderWrapper.getBorderList().get(i).get(j).clone());
+            }
+            if (!rowList.isEmpty())
+                sonBorderWrapper.getBorderList().add(rowList);
+        }
+
+        return sonBorderWrapper;
     }
 }

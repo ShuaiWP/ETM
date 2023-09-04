@@ -1,5 +1,5 @@
 import org.junit.Test;
-import reader.BorderWrapper;
+import com.iscas.etm.excelParser.reader.BorderWrapper;
 
 import java.io.IOException;
 

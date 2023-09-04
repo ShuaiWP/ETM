@@ -1,7 +1,7 @@
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import reader.BorderWrapper;
+package com.iscas.etm.excelParser.classifier;
+
+import com.iscas.etm.excelParser.reader.BorderWrapper;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,13 +11,22 @@ import java.util.HashMap;
 @NoArgsConstructor
 public class FileClassifier {
     public  ArrayList<ArrayList<String>> excelDataList;
-    public  BorderWrapper borderWrapper;
+    public BorderWrapper borderWrapper;
     public  String filepath;
-    public static HashMap<String, String> classNameMap = new HashMap<>();
 
-    static {
-        classNameMap.put("default", "factory.DefaultParserFactory");
-        classNameMap.put("continuedSheet", "factory.ContinuedSheetParserFactory");
+    @Getter(onMethod_ = @Deprecated)
+    @Setter(onMethod_ = @Deprecated)
+    public  HashMap<String, String> classNameMap = new HashMap<>();
+
+    {
+        classNameMap.put("default", "com.iscas.etm.excelParser.factory.DefaultParserFactory");
+        classNameMap.put("continuedSheet", "com.iscas.etm.excelParser.factory.ContinuedSheetParserFactory");
+    }
+
+    public FileClassifier(ArrayList<ArrayList<String>> excelDataList, BorderWrapper borderWrapper, String filepath) {
+        this.excelDataList = excelDataList;
+        this.borderWrapper = borderWrapper;
+        this.filepath = filepath;
     }
 
     public String classify() {
@@ -55,13 +64,13 @@ public class FileClassifier {
         int lastHeadingsRowIndex = borderWrapper.getLastHeadingsRowIndex(firstHeadingsRowIndex);
         // 1
         if (firstHeadingsRowIndex < 0 || lastHeadingsRowIndex < 0 ||lastHeadingsRowIndex < firstHeadingsRowIndex) {
-//            System.out.println("\t *** Illegal row index ***");
+            System.out.println("\t *** Illegal row index ***");
             return false;
         }
 
         // 2
         if (borderWrapper.getRowBorderLineNum() != 3) {
-//            System.out.println("\t *** borderLine ！= 3 ***");
+            System.out.println("\t *** borderLine ！= 3 ***");
             return false;
         }
 
@@ -75,7 +84,7 @@ public class FileClassifier {
                 }
             }
             if (flag) {
-//                System.out.println("\t *** exist null col "+ i + " ***");
+                System.out.println("\t *** exist null col "+ i + " ***");
                 return false;
             }
         }

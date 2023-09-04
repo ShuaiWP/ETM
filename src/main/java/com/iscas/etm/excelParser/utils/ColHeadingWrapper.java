@@ -1,4 +1,4 @@
-package utils;
+package com.iscas.etm.excelParser.utils;
 
 public class ColHeadingWrapper {
     private int index;  //行索引

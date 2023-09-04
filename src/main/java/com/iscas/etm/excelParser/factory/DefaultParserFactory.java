@@ -1,8 +1,8 @@
-package factory;
+package com.iscas.etm.excelParser.factory;
 
-import parser.AbstractParser;
-import parser.defaultParser.DefaultParser;
-import reader.BorderWrapper;
+import com.iscas.etm.excelParser.parser.defaultParser.DefaultParser;
+import com.iscas.etm.excelParser.parser.AbstractParser;
+import com.iscas.etm.excelParser.reader.BorderWrapper;
 
 import java.util.ArrayList;
 

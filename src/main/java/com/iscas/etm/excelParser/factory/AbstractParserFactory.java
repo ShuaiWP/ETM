@@ -1,7 +1,7 @@
-package factory;
+package com.iscas.etm.excelParser.factory;
 
-import parser.AbstractParser;
-import reader.BorderWrapper;
+import com.iscas.etm.excelParser.reader.BorderWrapper;
+import com.iscas.etm.excelParser.parser.AbstractParser;
 
 import java.util.ArrayList;
 
@@ -12,7 +12,7 @@ public abstract class AbstractParserFactory {
         try {
             factory = (AbstractParserFactory) Class.forName(factoryClass).newInstance();
         } catch (ClassNotFoundException e) {
-            System.out.println("没有找到该类！！！");
+            throw new RuntimeException("没有找到" + factoryClass + "类！！！");
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }

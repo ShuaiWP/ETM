@@ -1,10 +1,10 @@
-package parser.defaultParser;
+package com.iscas.etm.excelParser.parser.defaultParser;
 
 import lombok.Data;
 import org.bson.Document;
-import parser.AbstractParser;
-import utils.ColHeadingWrapper;
-import utils.CommonUtil;
+import com.iscas.etm.excelParser.parser.AbstractParser;
+import com.iscas.etm.excelParser.utils.ColHeadingWrapper;
+import com.iscas.etm.excelParser.utils.CommonUtil;
 
 import java.util.ArrayList;
 import java.util.List;

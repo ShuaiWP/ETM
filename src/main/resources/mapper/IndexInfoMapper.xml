@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iscas.etm.sqlDao.mapper.IndexInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.iscas.etm.sqlDao.domain.IndexInfo">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="indexName" column="indexName" jdbcType="VARCHAR"/>
+            <result property="englishName" column="englishName" jdbcType="VARCHAR"/>
+            <result property="year" column="year" jdbcType="INTEGER"/>
+            <result property="category" column="category" jdbcType="VARCHAR"/>
+            <result property="lastIndexId" column="lastIndexId" jdbcType="BIGINT"/>
+            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,indexName,englishName,
+        year,category,lastIndexId,
+        createTime,updateTime,isDelete
+    </sql>
+</mapper>

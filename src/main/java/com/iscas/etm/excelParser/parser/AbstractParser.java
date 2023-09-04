@@ -1,8 +1,8 @@
-package parser;
+package com.iscas.etm.excelParser.parser;
 
+import com.iscas.etm.excelParser.reader.BorderWrapper;
 import lombok.Data;
 import org.bson.Document;
-import reader.BorderWrapper;
 
 
 import java.util.ArrayList;

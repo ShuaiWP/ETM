@@ -1,29 +1,27 @@
+import com.iscas.etm.excelParser.classifier.FileClassifier;
 import org.junit.Test;
-import reader.BorderWrapper;
-import reader.ExcelReader;
-import utils.CommonUtil;
+import com.iscas.etm.excelParser.reader.BorderWrapper;
+import com.iscas.etm.excelParser.reader.ExcelReader;
+import com.iscas.etm.excelParser.utils.CommonUtil;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class FileClassifierTest {
     @Test
     public void test() throws IOException {
-        String Path = "D:\\projects\\ETM-main\\年鉴数据分析\\data\\data_xlsx";
+        String Path = "D:\\projects\\ETM-main\\年鉴数据分析\\data\\others\\2021_xlxs";
 
         File directory = new File(Path);
         File[] subDirectories = directory.listFiles(File::isDirectory);
 
         ArrayList<String> subDirectoryPaths = new ArrayList<>();
-        if (subDirectories != null) {
-            for (File subDirectory : subDirectories) {
-                subDirectoryPaths.add(subDirectory.getAbsolutePath());
-            }
+        for (File subDirectory : subDirectories) {
+            subDirectoryPaths.add(subDirectory.getAbsolutePath());
         }
+        subDirectoryPaths.add(Path);
 
         FileWriter fileWriter = new FileWriter("errPath.txt");
 

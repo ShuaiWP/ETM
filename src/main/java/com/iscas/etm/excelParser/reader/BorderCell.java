@@ -1,6 +1,6 @@
-package reader;
+package com.iscas.etm.excelParser.reader;
 
-public class BorderCell{
+public class BorderCell implements Cloneable{
     private boolean up;
     private boolean left;
     private boolean bottom;
@@ -36,5 +36,16 @@ public class BorderCell{
 
     public void setRight(boolean right) {
         this.right = right;
+    }
+
+    @Override
+    public BorderCell clone() {
+        BorderCell clone = new BorderCell();
+        clone.setBottom(this.bottom);
+        clone.setLeft(this.left);
+        clone.setRight(this.right);
+        clone.setUp(this.up);
+
+        return clone;
     }
 }
